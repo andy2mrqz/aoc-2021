@@ -24,11 +24,13 @@
 (defn -part2
   "Inspired by the cleaner solution to part 1, but I did it all myself!"
   [nums]
-  (->> (partition 2 1 (partition 3 1 nums))
+  (->> (partition 3 1 nums)
+       (partition 2 1)
        (filter (fn [[x y]] (> (reduce + y) (reduce + x))))
        count))
 
 (-part2 input)
+;; 1395
 
 ;; (comment
 ;;   (defn -part1
