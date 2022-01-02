@@ -3,43 +3,35 @@
   (:gen-class))
 
 (def input
-  (->> "resources/day02.txt"
-       slurp
+  (->> (slurp "resources/day02.txt")
        (s/split-lines)
-       (map #(s/split % #" "))))
+       (map #(let [[a b] (s/split % #" ")]
+               [(keyword a) (Integer/parseInt b)]))))
+
+(defn solve
+  [directions navigator]
+  (->> (reduce navigator {:x 0 :y 0 :aim 0} directions)
+       ((fn [{:keys [x y]}] (* x y)))))
 
 (defn navigate-part1
   [state [direction units]]
-  (let [units (Integer/parseInt units)]
-    (condp = direction
-      "forward" (update state :x + units)
-      "down" (update state :y + units)
-      "up" (update state :y - units))))
+  (direction {:forward (update state :x + units)
+              :down (update state :y + units)
+              :up (update state :y - units)}))
 
-(defn -part1
-  [directions]
-  (as-> directions $
-    (reduce navigate-part1 {:x 0 :y 0} $)
-    (* (:x $) (:y $))))
+(defn -part1 [directions] (solve directions navigate-part1))
 
 (-part1 input)
 ;; => 1660158
 
 (defn navigate-part2
-  [state [direction units]]
-  (let [units (Integer/parseInt units)]
-    (condp = direction
-      "forward" (as-> state $
-                  (update $ :x + units)
-                  (update $ :y + (* (:aim $) units)))
-      "down" (update state :aim + units)
-      "up" (update state :aim - units))))
+  [{aim :aim :as state} [direction units]]
+  (direction {:forward (-> (update state :x + units)
+                           (update :y + (* aim units)))
+              :down (update state :aim + units)
+              :up (update state :aim - units)}))
 
-(defn -part2
-  [directions]
-  (as-> directions $
-    (reduce navigate-part2 {:x 0 :y 0 :aim 0} $)
-    (* (:x $) (:y $))))
+(defn -part2 [directions] (solve directions navigate-part2))
 
 (-part2 input)
 ;; => 1604592846
