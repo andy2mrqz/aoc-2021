@@ -9,28 +9,28 @@
 (defn transpose [v] (apply mapv vector v))
 
 (defn find-bits-by
-  [gt-or-lt bits-at-position]
+  [op bits-at-position]
   (as-> (frequencies bits-at-position) freqs
     (case (compare (freqs \0) (freqs \1))
-      1  (if (= > gt-or-lt) \0 \1)
-      0  (if (= > gt-or-lt) \1 \0)
-      -1 (if (= > gt-or-lt) \1 \0))))
+      1  (if (= op >) \0 \1)
+      0  (if (= op >) \1 \0)
+      -1 (if (= op >) \1 \0))))
 
 (defn binary->decimal [binary-string] (Integer/parseInt binary-string 2))
 
 (defn -part1
   [nums]
   (let [transposed (transpose nums)
-        gamma-rate  (s/join (map (partial find-bits-by >) transposed))
-        epsilon-rate (s/join (map (partial find-bits-by <) transposed))]
-    (reduce * (map binary->decimal [gamma-rate epsilon-rate]))))
+        rate-fn (fn [op] ((comp binary->decimal s/join) (map (partial find-bits-by op) transposed)))
+        [gamma-rate epsilon-rate] (map rate-fn [> <])]
+    (* gamma-rate epsilon-rate)))
 
 (-part1 input)
 ;; => 1307354
 
 (defn find-rating
-  [gt-or-lt remaining pos]
-  (let [most-or-least-common ((partial find-bits-by gt-or-lt) (nth (transpose remaining) pos))
+  [op remaining pos]
+  (let [most-or-least-common ((partial find-bits-by op) (nth (transpose remaining) pos))
         bits-starting-with (filter #(= most-or-least-common (nth % pos)) remaining)]
     (if (= 1 (count bits-starting-with))
       (reduced bits-starting-with)
@@ -38,8 +38,8 @@
 
 (defn -part2
   [nums]
-  (let [[o2-rating] (reduce (partial find-rating >) nums (range (count (first nums))))
-        [co2-rating] (reduce (partial find-rating <) nums (range (count (first nums))))]
+  (let [rating-fn (fn [op] (reduce (partial find-rating op) nums (range (count (first nums)))))
+        [[o2-rating] [co2-rating]] (map rating-fn [> <])]
     (reduce * (map binary->decimal [o2-rating co2-rating]))))
 
 (-part2 input)
