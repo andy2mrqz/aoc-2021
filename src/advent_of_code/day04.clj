@@ -2,13 +2,14 @@
   (:require [clojure.string :as s])
   (:gen-class))
 
-(def input
+(def puzzle-input
   (->> (slurp "resources/day04.txt")
        (s/split-lines)))
 
-(def bingo-nums (as-> (first input) $
-                  (s/split $ #",")
-                  (map #(Integer/parseInt %) $)))
+(defn bingo-nums [input]
+  (as-> (first input) $
+    (s/split $ #",")
+    (map #(Integer/parseInt %) $)))
 
 (def EMPTY :e)
 (def MARKED :m)
@@ -22,7 +23,7 @@
     (update acc ((comp dec count) acc)
             conj (reduce create-line {} (re-seq #"\d+" line)))))
 
-(def bingo-boards (reduce create-board [] (rest input)))
+(defn bingo-boards [input] (reduce create-board [] (rest input)))
 
 (defn find-first [pred coll] (first (filter pred coll)))
 
@@ -60,9 +61,9 @@
       (reduced (score winning-board number))
       updated-boards)))
 
-(defn -part1 [] (reduce solve-part-1 bingo-boards bingo-nums))
+(defn -part1 [input] (reduce solve-part-1 (bingo-boards input) (bingo-nums input)))
 
-(-part1)
+(-part1 puzzle-input)
 ;; => 58412
 
 (defn solve-part-2
@@ -76,7 +77,7 @@
       (reduced (score maybe-winner number))
       except-winner)))
 
-(defn -part2 [] (reduce solve-part-2 bingo-boards bingo-nums))
+(defn -part2 [input] (reduce solve-part-2 (bingo-boards input) (bingo-nums input)))
 
-(-part2)
+(-part2 puzzle-input)
 ;; => 10030
