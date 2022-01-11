@@ -7,24 +7,23 @@
        (mapv #(Integer/parseInt %))))
 
 (defn distances
-  [x positions rate-fn]
-  (->> (map #(Math/abs (- x %)) positions)
-       (map rate-fn)
+  [positions rate-fn x]
+  (->> (map (comp rate-fn #(Math/abs (- x %))) positions)
        (reduce +)))
 
 (defn solve [positions rate-fn]
-  (let [s (apply min positions)
-        e (inc (apply max positions))]
-    (->> (into {} (for [x (range s e)] {x (distances x positions rate-fn)}))
-         (apply min-key val)
-         val)))
+  (let [[s e] (apply (juxt min max) positions)]
+    (->> (range s (inc e))
+         (map (partial distances positions rate-fn))
+         (apply min))))
 
 ;; Part 1
 (solve input identity)
 ;; => 340987
 
-;; 1 + 2 + 3 + ... + n
-(defn triangle [n] (reduce + (range 1 (inc n))))
+;; 1 + 2 + 3 + ... + n => n(n + 1) / 2
+(defn triangle [n] (/ (* n (inc n)) 2))
 
 ;; Part 2
 (solve input triangle)
+;; => 96987874
