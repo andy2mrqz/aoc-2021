@@ -78,7 +78,7 @@
 
 ;; Idea for this drastically more elegant solution borrowed from here:
 ;; https://github.com/abyala/advent-2021-clojure/blob/main/src/advent_2021_clojure/day08_joepittsy.clj
-;; I guess it was also inspired from a guy named Joe Pittsy but it wasn't on his github
+;; It was inspired by a guy named Joe Pittsy (https://mobile.twitter.com/JoePittsy/status/1468598079569989636)
 ;;
 ;; As soon as I understood the idea for the solution I implemented it myself to try and still
 ;; grasp it.  I really like the idea of finding an array of unique keys given known inputs - one
