@@ -75,3 +75,38 @@
 
 (-part2 input)
 ;; => 1027422
+
+;; Idea for this drastically more elegant solution borrowed from here:
+;; https://github.com/abyala/advent-2021-clojure/blob/main/src/advent_2021_clojure/day08_joepittsy.clj
+;; I guess it was also inspired from a guy named Joe Pittsy but it wasn't on his github
+;;
+;; As soon as I understood the idea for the solution I implemented it myself to try and still
+;; grasp it.  I really like the idea of finding an array of unique keys given known inputs - one
+;; of those times you wonder why you don't think like this all the time XD
+
+(defn shared [a b] (count (set/intersection (set a) (set b))))
+
+(def digit-keys
+  ;; [len digits-in-1 digits-in-4] digit
+  {[6 2 3] 0
+   [2 2 2] 1
+   [5 1 2] 2
+   [5 2 3] 3
+   [4 2 4] 4
+   [5 1 3] 5
+   [6 1 3] 6
+   [3 2 2] 7
+   [7 2 4] 8
+   [6 2 4] 9})
+
+(defn better-pt2 [{:keys [signals outputs]}]
+  (let [one  (take-first is1? signals)
+        four (take-first is4? signals)]
+    (->> (mapv (juxt count (partial shared one) (partial shared four)) outputs)
+         (mapv digit-keys)
+         (apply str))))
+
+(->> (mapv better-pt2 input)
+     (mapv #(Integer/parseInt %))
+     (reduce +))
+;; => 1027422
