@@ -26,6 +26,7 @@
 (-part1 input)
 ;; => 397
 
+;; A messy approach to part 2 using a series of deductions
 (defn take-first [pred coll] (first (filter pred coll)))
 
 (defn sort-length [coll] (sort-by count coll))
@@ -66,6 +67,7 @@
         outputs (:outputs entry)]
     (->> (map (fn [i] (m i)) outputs)
          str/join)))
+
 (defn -part2 [entries]
   (->> (mapv deduction entries)
        (mapv #(Integer/parseInt %))
