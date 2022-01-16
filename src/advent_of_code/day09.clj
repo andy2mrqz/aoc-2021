@@ -48,9 +48,9 @@
 (defn -part2 [hm]
   (->> (low-points hm)
        (mapv (fn [[_v r c]] (dfs hm #{} [r c])))
-       (sort-by count)
-       (take-last 3)
        (mapv count)
+       (sort >)
+       (take 3)
        (apply *)))
 
 (-part2 input)
