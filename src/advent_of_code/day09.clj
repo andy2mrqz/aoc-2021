@@ -45,13 +45,9 @@
         wvis (if (valid? hm s wkey) (dfs hm evis wkey) evis)]
     wvis))
 
-(defn basin-size [hm [v r c]]
-  ;; dfs of hm, keeping track of visited state
-  (->> (dfs hm #{} [r c])))
-
 (defn -part2 [hm]
   (->> (low-points hm)
-       (mapv (partial basin-size hm))
+       (mapv (fn [[_v r c]] (dfs hm #{} [r c])))
        (sort-by count)
        (take-last 3)
        (mapv count)
