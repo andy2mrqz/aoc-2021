@@ -29,25 +29,22 @@
 (-part1 input)
 ;; => 550
 
-(defn valid? [hm s k]
-  (false? (or (contains? s k)
+(defn valid? [hm visited k]
+  (false? (or (contains? visited k)
               (when-let [val (get-in hm k)] (= val 9)))))
 
-(defn dfs [hm s [x y :as key]]
-  (let [visited (conj s key)
-        nkey [(dec x) y]
-        skey [(inc x) y]
-        ekey [x (inc y)]
-        wkey [x (dec y)]
-        nvis (if (valid? hm s nkey) (dfs hm visited nkey) visited)
-        svis (if (valid? hm s skey) (dfs hm nvis skey) nvis)
-        evis (if (valid? hm s ekey) (dfs hm svis ekey) svis)
-        wvis (if (valid? hm s wkey) (dfs hm evis wkey) evis)]
-    wvis))
+(defn dfs [visited hm [x y :as key]]
+  (if (valid? hm visited key)
+    (-> (conj visited key)
+        (dfs hm [(dec x) y])  ;; north
+        (dfs hm [(inc x) y])  ;; south
+        (dfs hm [x (inc y)])  ;; east
+        (dfs hm [x (dec y)])) ;; west
+    visited))
 
 (defn -part2 [hm]
   (->> (low-points hm)
-       (mapv (fn [[_v r c]] (dfs hm #{} [r c])))
+       (mapv (fn [[_v r c]] (dfs #{} hm [r c])))
        (mapv count)
        (sort >)
        (take 3)
