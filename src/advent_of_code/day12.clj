@@ -8,12 +8,11 @@
       (update edge2 safe-conj-set edge1)))
 
 (def adj-list
-  (->> (slurp "resources/day12.sample2")
+  (->> (slurp "resources/day12.txt")
        (str/split-lines)
        (mapv #(str/split % #"-"))
        (reduce adjacency-list {})))
 
-(defn end? [cave] (= cave "end"))
 (defn large-cave? [cave] (= cave (str/upper-case cave)))
 (defn not-visited? [small-cave history] (not (contains? (set history) small-cave)))
 
@@ -22,7 +21,7 @@
 
 (defn find-paths [cave history nvf]
   (let [new-history (conj history cave)]
-    (if (end? cave)
+    (if (= cave "end")
       [new-history]
       (mapcat #(find-paths % new-history nvf) (visitable cave new-history nvf)))))
 
@@ -31,16 +30,15 @@
      count)
 ;; => 3713
 
-(defn at-most-one-duplicate? [history]
-  (let [freqs (frequencies (filter (complement large-cave?) history))
-        count-freqs (frequencies (vals freqs))
-        duplicates (or (count-freqs 2) 0)]
-    (< duplicates 2)))
+(defn small-cave-history [history] (filter (complement large-cave?) history))
 
-(defn not-visited-allowing-one-duplicate? [small-cave history]
-  (and (not= "start" small-cave)
-       (at-most-one-duplicate? history)
-       (< (or ((frequencies history) small-cave) 0) 2)))
+(defn duplicate-exists? [history]
+  (contains? (->> (small-cave-history history) frequencies vals set) 2))
+
+(defn not-visited-allowing-one-duplicate? [cave history]
+  (if (duplicate-exists? history)
+    (not-visited? cave history)
+    (not= "start" cave)))
 
 ;; part 2
 (->> (find-paths "start" [] not-visited-allowing-one-duplicate?)
