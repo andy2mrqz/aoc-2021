@@ -15,14 +15,12 @@
 (def folds  (->> (drop-while #(not (str/starts-with? % "fold")) input)
                  (mapv (comp (juxt second third->int) get-folds))))
 
-(defn maybe-fold [point dim center-idx]
-  (let [coord-idx (if (= "x" dim) 0 1)]
-    (if (< (get point coord-idx) center-idx)
-      point
-      (update point coord-idx #(- (* 2 center-idx) %)))))
-
 (defn apply-folds [sheet [dim center-idx]]
-  (set (map #(maybe-fold % dim center-idx) sheet)))
+  (set (for [point sheet
+             :let [coord-idx (if (= "x" dim) 0 1)]]
+         (if (< (get point coord-idx) center-idx)
+           point
+           (update point coord-idx #(- (* 2 center-idx) %))))))
 
 ;; part 1
 (->> (apply-folds coords (first folds))
