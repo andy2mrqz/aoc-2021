@@ -16,12 +16,12 @@
                  (mapv (comp (juxt second third) get-folds))))
 
 (defn x? [dim] (= dim "x"))
-(defn mirror [center to-mirror] (- center (- to-mirror center)))
+(defn mirror [center to-mirror] (- (* center 2) to-mirror))
 (defn mirror-x [center [x y]] [(mirror center x) y])
 (defn mirror-y [center [x y]] [x (mirror center y)])
 
 (defn apply-folds [sheet [dim idx]]
-  (let [[unaffected to-fold] (-> (group-by (fn [[x y]] (< (if (x? dim) x y) idx)) sheet) vals)
+  (let [{unaffected true, to-fold false} (group-by (fn [[x y]] (< (if (x? dim) x y) idx)) sheet)
         folded (map #((if (x? dim) mirror-x mirror-y) idx %) to-fold)]
     (set (concat unaffected folded))))
 
@@ -31,5 +31,10 @@
 ;; => 765
 
 ;; part 2
-(->> (reduce apply-folds coords folds)
-     count)
+(let [diagram (reduce apply-folds coords folds)
+      max-x (apply max (map first diagram))
+      max-y (apply max (map second diagram))]
+  (doseq [y (range (inc max-y))]
+    (doseq [x (range (inc max-x))]
+      (if (contains? diagram [x y]) (pr "#") (pr ".")))
+    (println)))
