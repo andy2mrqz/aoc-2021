@@ -3,8 +3,8 @@
 
 (defn get-coords [l] (->> (re-seq #"\d+" l)
                           (mapv #(Integer/parseInt %))))
-(defn get-folds [l] (first (re-seq #"([x|y])=(\d+)" l)))
-(defn third [coll] (Integer/parseInt (nth coll 2)))
+(defn get-folds [l] (first (re-seq #"([xy])=(\d+)" l)))
+(defn third->int [coll] (Integer/parseInt (nth coll 2)))
 
 (def input
   (->> (slurp "resources/day13.txt")
@@ -13,17 +13,16 @@
 (def coords (->> (take-while (complement str/blank?) input)
                  (mapv get-coords)))
 (def folds  (->> (drop-while #(not (str/starts-with? % "fold")) input)
-                 (mapv (comp (juxt second third) get-folds))))
+                 (mapv (comp (juxt second third->int) get-folds))))
 
-(defn x? [dim] (= dim "x"))
-(defn mirror [center to-mirror] (- (* center 2) to-mirror))
-(defn mirror-x [center [x y]] [(mirror center x) y])
-(defn mirror-y [center [x y]] [x (mirror center y)])
+(defn maybe-fold [point dim center-idx]
+  (let [coord-idx (if (= "x" dim) 0 1)]
+    (if (< (get point coord-idx) center-idx)
+      point
+      (update point coord-idx #(- (* 2 center-idx) %)))))
 
-(defn apply-folds [sheet [dim idx]]
-  (let [{unaffected true, to-fold false} (group-by (fn [[x y]] (< (if (x? dim) x y) idx)) sheet)
-        folded (map #((if (x? dim) mirror-x mirror-y) idx %) to-fold)]
-    (set (concat unaffected folded))))
+(defn apply-folds [sheet [dim center-idx]]
+  (set (map #(maybe-fold % dim center-idx) sheet)))
 
 ;; part 1
 (->> (apply-folds coords (first folds))
@@ -34,7 +33,7 @@
 (let [diagram (reduce apply-folds coords folds)
       max-x (apply max (map first diagram))
       max-y (apply max (map second diagram))]
-  (doseq [y (range (inc max-y))]
-    (doseq [x (range (inc max-x))]
-      (if (contains? diagram [x y]) (pr "#") (pr ".")))
-    (println)))
+  (run! println
+        (for [y (range (inc max-y))]
+          (apply str (for [x (range (inc max-x))]
+                       (if (contains? diagram [x y]) \█ \space))))))
