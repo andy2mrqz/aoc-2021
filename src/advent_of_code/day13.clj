@@ -31,7 +31,12 @@
 (let [diagram (reduce apply-folds coords folds)
       max-x (apply max (map first diagram))
       max-y (apply max (map second diagram))]
-  (run! println
-        (for [y (range (inc max-y))]
-          (apply str (for [x (range (inc max-x))]
-                       (if (contains? diagram [x y]) \█ \space))))))
+  (for [y (range (inc max-y))]
+    (apply str (for [x (range (inc max-x))]
+                 (if (contains? diagram [x y]) \█ \space)))))
+;; => ("███  ████ █  █ ████ █    ███   ██  █  █"
+;;     "█  █    █ █ █     █ █    █  █ █  █ █  █"
+;;     "█  █   █  ██     █  █    █  █ █    ████"
+;;     "███   █   █ █   █   █    ███  █ ██ █  █"
+;;     "█ █  █    █ █  █    █    █    █  █ █  █"
+;;     "█  █ ████ █  █ ████ ████ █     ███ █  █")
