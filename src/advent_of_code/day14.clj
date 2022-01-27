@@ -5,21 +5,18 @@
   (->> (slurp "resources/day14.txt")
        (str/split-lines)))
 
-(def template (first input))
+(def template (seq (first input)))
 
 (def rules (->> (drop 2 input)
-                (map (comp (juxt (comp seq second) #(nth % 2))
+                (map (comp (juxt #(seq (second %)) #(first (nth % 2)))
                            #(re-matches #"(\w+) -> (\w)" %)))
                 (into {})))
 
 (defn pair-insertion [template]
-  (let [pairs (partition 2 1 template)
-        inserted (for [pair pairs]
-                   (apply str ((juxt first rules second) pair)))
-        lastc ((comp last last) inserted)]
-    (apply str (-> (mapcat #(take 2 %) inserted)
-                   vec
-                   (conj lastc)))))
+  (let [lastc (last template)
+        pairs (partition 2 1 template)
+        inserted (mapcat #((juxt first rules) %) pairs)]
+    (conj (vec inserted) lastc)))
 
 ;; part 1
 (let [char-freqs (frequencies (nth (iterate pair-insertion template) 10))
