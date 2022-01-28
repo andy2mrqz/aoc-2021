@@ -8,8 +8,8 @@
 (def template (seq (first input)))
 
 (def rules (->> (drop 2 input)
-                (map (comp (juxt #(seq (second %)) #(first (nth % 2)))
-                           #(re-matches #"(\w+) -> (\w)" %)))
+                (map (comp (juxt (comp seq first) (comp first second))
+                           #(re-seq #"\w+" %)))
                 (into {})))
 
 (defn safe+ [a b] (+ (or a 0) b))
