@@ -12,15 +12,30 @@
                            #(re-matches #"(\w+) -> (\w)" %)))
                 (into {})))
 
-(defn pair-insertion [template]
-  (let [lastc (last template)
-        pairs (partition 2 1 template)
-        inserted (mapcat #((juxt first rules) %) pairs)]
-    (conj (vec inserted) lastc)))
+(defn safe+ [a b] (+ (or a 0) b))
+(defn update-ab-safe+ [m ka kb x] (-> (update m ka safe+ x)
+                                      (update kb safe+ x)))
+
+(defn pair-insert [pair-freqs]
+  (reduce (fn [pairs [pairA pairB :as pair]]
+            (let [match (rules pair)]
+              (update-ab-safe+ pairs
+                               (list pairA match)
+                               (list match pairB) (pair-freqs pair)))) {} (keys pair-freqs)))
+
+(defn solve [steps]
+  (let [pair-iterations (iterate pair-insert (frequencies (partition 2 1 template)))
+        pair-freqs (nth pair-iterations steps)
+        char-freqs (reduce (fn [fqs [[a b] count]]
+                             (update-ab-safe+ fqs a b count)) {} pair-freqs)
+        most-common (val (apply max-key val char-freqs))
+        least-common (val (apply min-key val char-freqs))]
+    (str (bigdec (Math/ceil (/ (- most-common least-common) 2))))))
 
 ;; part 1
-(let [char-freqs (frequencies (nth (iterate pair-insertion template) 10))
-      most-common (apply max-key val char-freqs)
-      least-common (apply min-key val char-freqs)]
-  (- (val most-common) (val least-common)))
-;; => 2447
+(solve 10)
+;; => "2447.0"
+
+;; part 2
+(solve 40)
+;; => "3018019237563"
